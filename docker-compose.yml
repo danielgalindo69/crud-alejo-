@@ -1,0 +1,42 @@
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2026
+      POSTGRES_DB: dbcarros
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./back/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+
+  backend:
+    build: ./back
+    container_name: car_backend
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2026
+      POSTGRES_DB: dbcarros
+      DB_PORT: 5432
+    depends_on:
+      - postgres
+    restart: always
+
+  frontend:
+    build: ./front/frontend
+    container_name: car_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:
